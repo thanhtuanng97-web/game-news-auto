@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Game News Auto</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0a0a12; color: #f0f0f0;
+  min-height: 100vh; padding: 16px 16px 80px;
+  max-width: 720px; margin: 0 auto;
+}
+.header { text-align: center; margin-bottom: 20px; padding-top: 12px; }
+.header h1 { font-size: 23px; font-weight: 900; color: #fff; }
+.header p { font-size: 13px; color: #555; margin-top: 4px; }
+
+.tabs {
+  display: flex; gap: 6px; margin-bottom: 18px;
+  background: #13131e; padding: 5px; border-radius: 12px;
+}
+.tab {
+  flex: 1; padding: 9px 4px; border-radius: 8px; border: none;
+  background: transparent; color: #555; font-size: 12px;
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.tab.active { background: #7c3aed; color: #fff; }
+.pane { display: none; }
+.pane.show { display: block; }
+
+.card { background: #13131e; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.card label {
+  font-size: 11px; color: #666; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  display: block; margin-bottom: 8px;
+}
+.card select, .card input, .card textarea {
+  width: 100%; background: #0a0a12; border: 1px solid #1e1e2e;
+  border-radius: 8px; color: #f0f0f0; font-size: 14px;
+  padding: 10px 12px; outline: none; font-family: inherit; transition: border .2s;
+}
+.card select:focus, .card input:focus, .card textarea:focus { border-color: #7c3aed; }
+.card textarea { resize: vertical; min-height: 130px; line-height: 1.75; }
+.row { display: flex; gap: 10px; }
+.row .card { flex: 1; margin-bottom: 0; }
+
+.btn {
+  padding: 10px 16px; border-radius: 9px; border: none;
+  cursor: pointer; font-size: 13px; font-weight: 700;
+  transition: opacity .2s; font-family: inherit;
+}
+.btn:hover { opacity: .85; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+.btn-purple { background: #7c3aed; color: #fff; }
+.btn-green  { background: #22c55e; color: #000; }
+.btn-orange { background: #f59e0b; color: #000; }
+.btn-gray   { background: #1e1e2e; color: #888; }
+.btn-red    { background: #ef4444; color: #fff; }
+.btn-full   { width: 100%; padding: 14px; font-size: 15px; }
+
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid #1e1e2e; border-top-color: #7c3aed;
+  border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* NEWS LIST */
+.news-item {
+  background: #0a0a12; border: 1px solid #1e1e2e; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s;
+}
+.news-item:hover { border-color: #7c3aed; }
+.news-item.sel { border-color: #7c3aed; background: #7c3aed0d; }
+.news-title { font-size: 14px; color: #e0e0e0; font-weight: 600; line-height: 1.5; margin-bottom: 5px; }
+.news-meta { font-size: 11px; color: #444; display: flex; gap: 10px; }
+.news-src { color: #7c3aed; font-weight: 700; }
+
+/* RESULT BLOCKS */
+.rblock { background: #13131e; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.rblock-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.rblock-title { font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: .5px; }
+.rblock-text { font-size: 14px; color: #ddd; line-height: 1.8; white-space: pre-wrap; }
+.btn-copy {
+  padding: 5px 12px; background: #1e1e2e; color: #777;
+  font-size: 11px; border: none; border-radius: 6px; cursor: pointer;
+}
+.btn-copy:hover { background: #7c3aed; color: #fff; }
+.btn-copy.ok { background: #22c55e; color: #fff; }
+
+/* IMG LIST */
+.img-list { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.img-item {
+  display: flex; align-items: center; gap: 10px; background: #0a0a12;
+  border: 1px solid #1e1e2e; border-radius: 8px; padding: 8px 12px;
+  cursor: pointer; transition: border-color .2s;
+}
+.img-item:hover { border-color: #7c3aed; }
+.img-item.sel { border-color: #22c55e; }
+.img-item img { width: 64px; height: 42px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.img-info { flex: 1; }
+.img-info span { font-size: 12px; color: #ccc; display: block; }
+.img-info small { font-size: 10px; color: #444; }
+.img-sel { font-size: 11px; color: #444; }
+.img-item.sel .img-sel { color: #22c55e; }
+
+/* QUEUE */
+.qitem { background: #13131e; border: 1px solid #1e1e2e; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.qitem-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.qitem-title { font-size: 13px; color: #ddd; font-weight: 700; flex: 1; margin-right: 10px; line-height: 1.5; }
+.qitem-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.qitem-preview { font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 8px; white-space: pre-wrap; }
+.qitem-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.badge { font-size: 10px; padding: 3px 9px; border-radius: 5px; font-weight: 700; }
+.badge-wait { background: #f59e0b22; color: #f59e0b; }
+.badge-done { background: #22c55e22; color: #22c55e; }
+.badge-err  { background: #ef444422; color: #ef4444; }
+
+.divider { height: 1px; background: #1a1a2a; margin: 16px 0; }
+.sec { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; color: #7c3aed; margin-bottom: 10px; }
+.empty { text-align: center; padding: 40px 20px; color: #333; font-size: 14px; }
+
+.step-block { background: #13131e; border-radius: 12px; padding: 16px; border-left: 3px solid #7c3aed; margin-top: 12px; }
+.step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; color: #aaa; line-height: 1.6; }
+.step:last-child { margin-bottom: 0; }
+.sn {
+  min-width: 22px; height: 22px; background: #7c3aed; color: #fff;
+  font-size: 11px; font-weight: 800; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.status-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0e0e18; border-top: 1px solid #1a1a2a;
+  padding: 10px 20px; font-size: 12px; color: #555;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.sdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; background: #333; }
+
+/* SERVER WARNING */
+.srv-warn {
+  background: #ef444411; border: 1px solid #ef444433; border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 14px; font-size: 13px; color: #ef4444; line-height: 1.7;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎮 Game News Auto</h1>
+  <p>Lấy tin thật → AI viết lại → Đăng Facebook tự động</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="go(0)">📡 Tin tức</button>
+  <button class="tab" onclick="go(1)">✏️ Xử lý</button>
+  <button class="tab" onclick="go(2)">📋 Hàng chờ <span id="qcount"></span></button>
+</div>
+
+<!-- ═══ TAB 0: TIN TỨC ═══ -->
+<div class="pane show" id="pane0">
+
+  <div class="srv-warn" id="srv-warn">
+    ⚠️ Server chưa chạy! Mở CMD trong thư mục <strong>game_news</strong> → gõ <strong>start.bat</strong> rồi F5 lại trang này.
+  </div>
+
+  <div class="card">
+    <label>📰 Nguồn tin</label>
+    <select id="src-select">
+      <option value="all">🌐 Tất cả nguồn</option>
+    </select>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn btn-purple" style="flex:1;padding:13px" id="fetchBtn" onclick="fetchNews()">
+      📡 Lấy tin mới nhất
+    </button>
+    <button class="btn btn-orange" style="flex:1;padding:13px" id="fetchAllBtn" onclick="fetchAll()">
+      🌐 Lấy tất cả nguồn
+    </button>
+  </div>
+
+  <div id="news-list"><div class="empty">Bấm "Lấy tin" để bắt đầu</div></div>
+  <div id="pick-hint" style="display:none;margin-top:10px">
+    <button class="btn btn-orange btn-full" onclick="go(1)">✏️ Xử lý bài đã chọn →</button>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 1: XỬ LÝ ═══ -->
+<div class="pane" id="pane1">
+
+  <div id="no-sel" class="empty">Quay lại tab "Tin tức" và chọn 1 bài trước</div>
+
+  <div id="editor" style="display:none">
+    <div class="card">
+      <label>📌 Tiêu đề gốc</label>
+      <div id="orig-title" style="font-size:14px;color:#888;line-height:1.6"></div>
+      <div id="orig-src"   style="font-size:11px;color:#7c3aed;margin-top:4px;font-weight:700"></div>
+    </div>
+
+    <div class="row" style="margin-bottom:12px">
+      <div class="card">
+        <label>📌 Dạng bài</label>
+        <select id="post-type">
+          <option value="tin-update">🔥 Tin hot / Update</option>
+          <option value="binh-luan">🗣️ Bình luận cộng đồng</option>
+          <option value="tom-tat">📝 Tóm tắt nhanh</option>
+          <option value="tranh-luan">💬 Câu hỏi tranh luận</option>
+        </select>
+      </div>
+      <div class="card">
+        <label>😄 Tone</label>
+        <select id="tone">
+          <option value="hype, dùng từ gamer VN như GG, meta, buff, nerf">🔥 Gamer VN</option>
+          <option value="hài hước, meme">😂 Hài hước</option>
+          <option value="chuyên nghiệp, phân tích">🧠 Chuyên sâu</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>🤖 Bài viết Facebook</label>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:#444">Chỉnh sửa tuỳ ý</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn-copy" onclick="cpEl('fb-post',this)">Copy</button>
+          <button class="btn btn-gray" style="padding:5px 12px;font-size:11px" onclick="rewrite()">🔄 Viết lại</button>
+        </div>
+      </div>
+      <textarea id="fb-post" placeholder="Bấm '⚡ Tạo bài' để AI viết..."></textarea>
+    </div>
+
+    <div class="card">
+      <label>🎤 Kịch bản CapCut TTS</label>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:#444">Paste vào CapCut → Text → Text to Speech</span>
+        <button class="btn-copy" onclick="cpEl('tts-out',this)">Copy</button>
+      </div>
+      <div id="tts-out" style="font-size:13px;color:#888;line-height:1.8;white-space:pre-wrap;min-height:60px"></div>
+    </div>
+
+    <div class="card">
+      <label>🖼️ Ảnh — Pexels</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input type="text" id="img-kw" placeholder="Từ khoá tìm ảnh..." style="flex:1" />
+        <button class="btn btn-gray" onclick="searchImg()">Tìm</button>
+      </div>
+      <div id="kw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+      <div class="img-list" id="img-list"></div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-purple" style="flex:1;padding:13px" id="aiBtn" onclick="autoAll()">⚡ Tạo bài</button>
+      <button class="btn btn-green"  style="flex:1;padding:13px" onclick="addQueue()">📋 Thêm hàng chờ</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 2: HÀNG CHỜ ═══ -->
+<div class="pane" id="pane2">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="sec" style="margin-bottom:0">Bài chờ đăng</div>
+    <button class="btn btn-red" style="padding:7px 14px;font-size:12px" onclick="clearAll()">🗑 Xoá hết</button>
+  </div>
+  <div id="queue-list"><div class="empty">Chưa có bài nào</div></div>
+</div>
+
+
+<div class="status-bar">
+  <div><span class="sdot" id="sdot"></span><span id="stext">Đang kiểm tra server...</span></div>
+  <div id="sqtext" style="color:#333">Hàng chờ: 0 bài</div>
+</div>
+
+<script>
+const API        = '';
+
+let queue  = JSON.parse(localStorage.getItem('gna_q') || '[]');
+let cfg    = JSON.parse(localStorage.getItem('gna_cfg') || '{}');
+let selArt = null;
+let selImg = null;
+
+// ── INIT ──────────────────────────────────────
+async function init() {
+  renderQueue();
+  await checkServer();
+  await loadSources();
+}
+
+async function checkServer() {
+  try {
+    await fetch(API + '/ping');
+    setSt('Server đang chạy ✓', true);
+  } catch {
+    setSt('Server chưa chạy — mở start.bat!', false);
+    document.getElementById('srv-warn').style.display = 'block';
+  }
+}
+
+async function loadSources() {
+  try {
+    const r  = await fetch(API + '/sources');
+    const names = await r.json();
+    const sel = document.getElementById('src-select');
+    names.forEach(n => {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = n;
+      sel.appendChild(o);
+    });
+  } catch {}
+}
+
+// ── TABS ──────────────────────────────────────
+function go(i) {
+  document.querySelectorAll('.pane').forEach((p,j) => p.classList.toggle('show', i===j));
+  document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j));
+  if (i === 1) checkEditor();
+}
+
+// ── STATUS ────────────────────────────────────
+function setSt(msg, ok=true) {
+  document.getElementById('stext').textContent = msg;
+  document.getElementById('sdot').style.background = ok ? '#22c55e' : '#ef4444';
+}
+function updQ() {
+  const n = queue.length;
+  document.getElementById('qcount').textContent = n ? `(${n})` : '';
+  document.getElementById('sqtext').textContent = `Hàng chờ: ${n} bài`;
+}
+
+// ── FETCH NEWS ────────────────────────────────
+async function fetchNews() {
+  const src = document.getElementById('src-select').value;
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Đang lấy tin...';
+  setSt('Đang lấy tin...');
+
+  try {
+    const r = await fetch(`${API}/news?source=${encodeURIComponent(src)}`);
+    const d = await r.json();
+    if (!d.items?.length) throw new Error('Không có bài nào');
+    renderNews(d.items);
+    setSt(`Lấy được ${d.total} bài — chọn 1 bài để xử lý`);
+  } catch(e) {
+    setSt('Lỗi: ' + e.message, false);
+    document.getElementById('news-list').innerHTML = `<div class="empty" style="color:#ef4444">❌ ${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '📡 Lấy tin mới nhất';
+}
+
+async function fetchAll() {
+  document.getElementById('src-select').value = 'all';
+  await fetchNews();
+}
+
+function renderNews(items) {
+  const el = document.getElementById('news-list');
+  el._items = items;
+  el.innerHTML = items.map((item, i) => `
+    <div class="news-item" id="ni${i}" onclick="pickArticle(${i})">
+      <div class="news-title">${item.title}</div>
+      <div class="news-meta">
+        <span class="news-src">${item.source}</span>
+        <span>${fmtDate(item.pubDate)}</span>
+        ${item.link ? `<a href="${item.link}" target="_blank" onclick="event.stopPropagation()" style="color:#f59e0b;text-decoration:none;font-weight:700">🔗 Xem bài gốc</a>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function pickArticle(i) {
+  const items = document.getElementById('news-list')._items;
+  selArt = items[i];
+  selImg = null;
+  document.querySelectorAll('.news-item').forEach((el,j) => el.classList.toggle('sel', i===j));
+  document.getElementById('pick-hint').style.display = 'block';
+  setSt(`Đã chọn: ${selArt.title.slice(0, 55)}...`);
+}
+
+function checkEditor() {
+  const has = !!selArt;
+  document.getElementById('no-sel').style.display  = has ? 'none'  : 'block';
+  document.getElementById('editor').style.display  = has ? 'block' : 'none';
+  if (has) {
+    document.getElementById('orig-title').textContent = selArt.title;
+    document.getElementById('orig-src').textContent   = '📰 ' + selArt.source;
+    document.getElementById('img-kw').value = extractKw(selArt.title);
+  }
+}
+
+// ── AI ────────────────────────────────────────
+async function ai(prompt) {
+  const r = await fetch('/proxy/anthropic', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1200,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.content?.[0]?.text || '';
+}
+
+async function rewrite() {
+  if (!selArt) return;
+  const type = document.getElementById('post-type').value;
+  const tone = document.getElementById('tone').value;
+  const typeLabel = {
+    'tin-update':  'Tin hot / Update mới',
+    'binh-luan':   'Bình luận quan điểm cộng đồng',
+    'tom-tat':     'Tóm tắt nhanh dễ đọc',
+    'tranh-luan':  'Câu hỏi gây tranh luận'
+  }[type];
+
+  const btn = document.getElementById('aiBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>AI đang viết...';
+  setSt('AI đang viết lại bài...');
+
+  const fullText = (selArt.content || selArt.description || '').replace(/<[^>]*>/g,'').slice(0, 1500);
+  const p1 = `Bạn là admin fanpage game VN có 500k follow. Nhiệm vụ: viết lại tin game sau thành 1 post Facebook hoàn chỉnh.
+
+=== NỘI DUNG BÀI GỐC ===
+Tiêu đề: "${selArt.title}"
+Nguồn: ${selArt.source}
+Nội dung: "${fullText}"
+=== HẾT NỘI DUNG GỐC ===
+
+Dạng bài: ${typeLabel}
+Tone: ${tone}
+
+YÊU CẦU BẮT BUỘC:
+1. Câu đầu tiên phải là hook mạnh — gây tò mò hoặc hype, người đọc phải muốn đọc tiếp
+2. Phần thân bài: truyền tải ĐẦY ĐỦ thông tin quan trọng từ bài gốc, không bỏ sót chi tiết chính, người đọc phải hiểu được bức tranh toàn cảnh mà không cần vào đọc bài gốc
+3. Dài 200–250 chữ — đủ để trình bày hết ý, không cắt giữa chừng
+4. Xen 4–6 emoji tự nhiên vào nội dung, không spam emoji
+5. Kết bài bằng 1 câu hỏi mở hoặc kêu gọi bình luận ý kiến
+6. 5–7 hashtag game tiếng Việt phù hợp ở cuối
+7. KHÔNG bịa hoặc thêm thông tin không có trong bài gốc
+8. TUYỆT ĐỐI KHÔNG dùng các từ bị Facebook cấm:
+   - Bạo lực: giết, thảm sát, chém, đâm, bắn chết, xử, thịt (chỉ người)
+   - Kích động: căm thù, nghiền nát (chỉ người/nhóm)
+   - Chính trị: đảng, chính phủ, biểu tình, lật đổ
+   - Clickbait: "Share ngay", "Tag bạn bè ngay", "Viral", "100%", "Miễn phí hoàn toàn"
+   - Thay thế an toàn: "đánh bại" thay "giết", "hạ gục" thay "tiêu diệt" (khi chỉ người)
+
+Chỉ trả lời nội dung post hoàn chỉnh, không giải thích, không tiêu đề.`;
+
+  const p2 = `Viết kịch bản đọc giọng CapCut TTS tiếng Việt cho tin game: "${selArt.title}"
+- Mỗi câu tối đa 10 chữ, xuống dòng sau mỗi câu
+- Không dùng emoji hoặc ký tự đặc biệt
+- Tự nhiên, vui tươi, phù hợp giọng đọc máy
+- Khoảng 6–8 câu
+Chỉ trả lời kịch bản.`;
+
+  const p3 = `Đề xuất 4 từ khoá tiếng Anh ngắn gọn để tìm ảnh trên Pexels cho bài viết về: "${selArt.title}"
+Yêu cầu: từ khoá mô tả hình ảnh cụ thể, phù hợp game/esport, mỗi từ khoá 1–3 chữ tiếng Anh.
+Chỉ trả lời đúng format: keyword1, keyword2, keyword3, keyword4`;
+
+  try {
+    const [o1, o2, o3] = await Promise.all([ai(p1), ai(p2), ai(p3)]);
+    document.getElementById('fb-post').value       = o1.trim();
+    document.getElementById('tts-out').textContent = o2.trim();
+
+    // Hiển thị từ khoá gợi ý
+    const kws = o3.split(',').map(k => k.trim().replace(/[\.\*]/g, '')).filter(Boolean).slice(0, 4);
+    document.getElementById('kw-suggestions').innerHTML = kws.map(k => `
+      <span onclick="useKw('${k}')" style="
+        padding:4px 11px; background:#1a1a2a; border-radius:20px;
+        font-size:12px; color:#a78bfa; cursor:pointer;
+        border:1px solid #7c3aed44; transition:all .15s;
+      " onmouseover="this.style.background='#7c3aed33'" onmouseout="this.style.background='#1a1a2a'">
+        🔍 ${k}
+      </span>`).join('');
+
+    // Tự điền từ khoá đầu tiên
+    if (kws[0]) document.getElementById('img-kw').value = kws[0];
+
+    setSt('AI viết xong — chỉnh sửa rồi thêm vào hàng chờ');
+  } catch(e) {
+    setSt('Lỗi AI: ' + e.message, false);
+  }
+
+  btn.disabled = false; btn.innerHTML = '⚡ Tạo bài';
+}
+
+async function autoAll() {
+  await rewrite();
+  await searchImg();
+}
+
+// ── PEXELS ────────────────────────────────────
+async function searchImg() {
+  const q = document.getElementById('img-kw').value.trim() || 'gaming';
+  try {
+    const r = await fetch(`/proxy/pexels?query=${encodeURIComponent(q)}`);
+    const d = await r.json();
+    renderImgs(d.photos || []);
+  } catch(e) { setSt('Lỗi tìm ảnh', false); }
+}
+
+function renderImgs(photos) {
+  const el = document.getElementById('img-list');
+  if (!photos.length) { el.innerHTML = '<div style="font-size:12px;color:#333">Không tìm thấy ảnh</div>'; return; }
+  selImg = photos[0].src.large;
+  el.innerHTML = photos.map((p,i) => `
+    <div class="img-item ${i===0?'sel':''}" id="ii${i}" onclick="pickImg(${i},'${p.src.large}')">
+      <img src="${p.src.tiny}" alt="" />
+      <div class="img-info">
+        <span>${p.alt?.slice(0,45)||'Ảnh game'}</span>
+        <small>${p.photographer}</small>
+      </div>
+      <span class="img-sel">${i===0?'✓ Đã chọn':'Chọn'}</span>
+    </div>`).join('');
+}
+
+function pickImg(i, url) {
+  selImg = url;
+  document.querySelectorAll('.img-item').forEach((el,j) => {
+    el.classList.toggle('sel', j===i);
+    el.querySelector('.img-sel').textContent = j===i ? '✓ Đã chọn' : 'Chọn';
+  });
+}
+
+// ── QUEUE ─────────────────────────────────────
+function addQueue() {
+  const content = document.getElementById('fb-post').value.trim();
+  const tts     = document.getElementById('tts-out').textContent.trim();
+  if (!content) { alert('Chưa có nội dung — bấm "Tạo bài" trước!'); return; }
+  queue.push({ id: Date.now(), title: selArt?.title || 'Bài game', content, tts, imgUrl: selImg, status: 'wait' });
+  saveQ(); renderQueue(); updQ();
+  setSt(`Đã thêm vào hàng chờ (${queue.length} bài)`);
+  go(2);
+}
+
+function saveQ() { localStorage.setItem('gna_q', JSON.stringify(queue)); }
+
+function renderQueue() {
+  updQ();
+  const el = document.getElementById('queue-list');
+  if (!queue.length) { el.innerHTML = '<div class="empty">Chưa có bài nào</div>'; return; }
+  el.innerHTML = queue.map(q => `
+    <div class="qitem">
+      <div class="qitem-top">
+        <div class="qitem-title">${q.title}</div>
+        <div class="qitem-btns">
+          <button class="btn btn-green" style="padding:5px 10px;font-size:11px" onclick="copyQ(${q.id},this)">Copy</button>
+          <button class="btn btn-red"   style="padding:5px 10px;font-size:11px" onclick="delQ(${q.id})">Xoá</button>
+        </div>
+      </div>
+      <div class="qitem-preview">${q.content.slice(0,160)}${q.content.length>160?'...':''}</div>
+      <div class="qitem-meta">
+        <span class="badge badge-wait">📋 Chờ lên lịch</span>
+        ${q.imgUrl?'<span style="font-size:11px;color:#444">🖼️ Có ảnh</span>':''}
+        ${q.tts?'<span style="font-size:11px;color:#444">🎤 Có TTS</span>':''}
+      </div>
+    </div>`).join('');
+}
+
+function delQ(id)   { queue = queue.filter(q => q.id !== id); saveQ(); renderQueue(); }
+function clearAll() { if(confirm('Xoá hết?')) { queue=[]; saveQ(); renderQueue(); } }
+
+// ── COPY QUEUE ITEM ───────────────────────────
+function copyQ(id, btn) {
+  const item = queue.find(q => q.id === id);
+  if (!item) return;
+  navigator.clipboard.writeText(item.content).then(() => {
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    setSt('✅ Đã copy nội dung — vào Meta Business Suite để lên lịch!');
+  });
+}
+
+// ── HELPERS ───────────────────────────────────
+function cpEl(id, btn) {
+  const el = document.getElementById(id);
+  const text = el.value !== undefined ? el.value : el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function useKw(kw) {
+  document.getElementById('img-kw').value = kw;
+  searchImg();
+}
+
+function extractKw(title) {
+  const games = ['mobile legends','liên quân','pubg','free fire','genshin','valorant',
+    'minecraft','fortnite','league','lol','mlbb','honkai','steam','esport'];
+  const t = title.toLowerCase();
+  for (const g of games) if (t.includes(g)) return g + ' gaming';
+  return 'gaming';
+}
+
+function fmtDate(str) {
+  if (!str) return '';
+  try { return new Date(str).toLocaleDateString('vi-VN'); } catch { return str; }
+}
+
+init();
+</script>
+</body>
+</html>
