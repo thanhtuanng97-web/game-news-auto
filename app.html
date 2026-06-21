@@ -462,8 +462,16 @@ Chỉ trả lời nội dung caption hoàn chỉnh, không giải thích, không
 - Khoảng 6–8 câu
 Chỉ trả lời kịch bản.`;
 
-  const p3 = `Đề xuất 4 từ khoá tiếng Anh ngắn gọn để tìm ảnh trên Pexels cho bài viết về: "${selArt.title}"
-Yêu cầu: từ khoá mô tả hình ảnh cụ thể, phù hợp game/esport, mỗi từ khoá 1–3 chữ tiếng Anh.
+  const p3 = `Đề xuất 4 từ khoá tiếng Anh ngắn gọn để tìm ảnh minh hoạ trên Pexels cho bài viết game sau.
+
+Tiêu đề: "${selArt.title}"
+Nội dung tóm tắt: "${fullText.slice(0, 400)}"
+
+Yêu cầu:
+- Ưu tiên tên game cụ thể (VD: "Elden Ring", "Valorant", "GTA 6") nếu có trong bài
+- Nếu không có tên game cụ thể, dùng từ mô tả hình ảnh phù hợp (VD: "esports tournament", "gaming controller", "open world game")
+- Mỗi từ khoá 1–3 chữ tiếng Anh, có thể search được trên Pexels
+- KHÔNG dùng từ quá chung chung như "game", "gaming", "video game"
 Chỉ trả lời đúng format: keyword1, keyword2, keyword3, keyword4`;
 
   try {
