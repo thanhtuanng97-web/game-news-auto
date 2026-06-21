@@ -525,9 +525,13 @@ function renderImgs(photos) {
   el.innerHTML = photos.map((p,i) => `
     <div class="img-item ${i===0?'sel':''}" id="ii${i}" onclick="pickImg(${i},'${p.src.large}')">
       <img src="${p.src.tiny}" alt="" />
-      <div class="img-info">
-        <span>${p.alt?.slice(0,45)||'Ảnh game'}</span>
+      <div class="img-info" style="flex:1;min-width:0">
+        <span>${p.alt?.slice(0,40)||'Ảnh game'}</span>
         <small>${p.photographer}</small>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+          <a href="${p.src.large}" target="_blank" style="font-size:11px;color:#a78bfa;text-decoration:none" onclick="event.stopPropagation()">🔗 Link ảnh lớn</a>
+          <a href="${p.src.original}" target="_blank" style="font-size:11px;color:#f59e0b;text-decoration:none" onclick="event.stopPropagation()">⬇️ Gốc full size</a>
+        </div>
       </div>
       <span class="img-sel">${i===0?'✓ Đã chọn':'Chọn'}</span>
     </div>`).join('');
