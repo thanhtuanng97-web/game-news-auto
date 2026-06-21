@@ -426,8 +426,16 @@ async function rewrite() {
 
   const fullText = (selArt.content || selArt.description || '').replace(/<[^>]*>/g,'').slice(0, 1500);
   const isEn = (selArt.lang || 'en') === 'en';
-  const translateNote = isEn ? '\nLƯU Ý: Bài gốc bằng tiếng Anh — hãy dịch và diễn đạt lại hoàn toàn bằng tiếng Việt tự nhiên, KHÔNG dịch từng từ.' : '';
-  const p1 = `Bạn là admin fanpage game VN có 500k follow. Nhiệm vụ: viết lại tin game sau thành 1 post Facebook hoàn chỉnh bằng TIẾNG VIỆT.${translateNote}
+  const translateNote = isEn ? '\nLƯU Ý: Bài gốc bằng tiếng Anh — dịch và diễn đạt lại hoàn toàn bằng tiếng Việt tự nhiên, KHÔNG dịch từng từ.' : '';
+  const p1 = `Bạn là chuyên gia content gaming cho fanpage Facebook "Ping Cao" (@PingCaoVN).${translateNote}
+
+BỐI CẢNH FANPAGE:
+- Tagline: "Tin game không bao giờ lag"
+- Đối tượng: gamer Việt Nam, thích tin tức game nhanh - gọn - dễ hiểu
+- Tone: trẻ trung, hơi "trêu", dùng từ ngữ gamer quen thuộc, KHÔNG cứng nhắc như báo chí
+
+NHIỆM VỤ: Viết 1 caption Facebook về tin tức sau.
+Dạng bài: ${typeLabel} | Tone: ${tone}
 
 === NỘI DUNG BÀI GỐC ===
 Tiêu đề: "${selArt.title}"
@@ -435,25 +443,17 @@ Nguồn: ${selArt.source}
 Nội dung: "${fullText}"
 === HẾT NỘI DUNG GỐC ===
 
-Dạng bài: ${typeLabel}
-Tone: ${tone}
+YÊU CẦU FORMAT:
+1. Hook mở đầu (1 câu, gây chú ý trong 3 giây đầu)
+2. Nội dung chính (3-5 câu, ngắn gọn, dễ đọc trên mobile) — truyền đủ thông tin quan trọng, KHÔNG bịa thêm
+3. Câu kêu gọi tương tác (hỏi ý kiến / mời comment)
+4. 3-5 hashtag (ưu tiên tiếng Việt + tên game cụ thể)
 
-YÊU CẦU BẮT BUỘC:
-1. Câu đầu tiên phải là hook mạnh — gây tò mò hoặc hype, người đọc phải muốn đọc tiếp
-2. Phần thân bài: truyền tải ĐẦY ĐỦ thông tin quan trọng từ bài gốc, không bỏ sót chi tiết chính, người đọc phải hiểu được bức tranh toàn cảnh mà không cần vào đọc bài gốc
-3. Dài 200–250 chữ — đủ để trình bày hết ý, không cắt giữa chừng
-4. Xen 4–6 emoji tự nhiên vào nội dung, không spam emoji
-5. Kết bài bằng 1 câu hỏi mở hoặc kêu gọi bình luận ý kiến
-6. 5–7 hashtag game tiếng Việt phù hợp ở cuối
-7. KHÔNG bịa hoặc thêm thông tin không có trong bài gốc
-8. TUYỆT ĐỐI KHÔNG dùng các từ bị Facebook cấm:
-   - Bạo lực: giết, thảm sát, chém, đâm, bắn chết, xử, thịt (chỉ người)
-   - Kích động: căm thù, nghiền nát (chỉ người/nhóm)
-   - Chính trị: đảng, chính phủ, biểu tình, lật đổ
-   - Clickbait: "Share ngay", "Tag bạn bè ngay", "Viral", "100%", "Miễn phí hoàn toàn"
-   - Thay thế an toàn: "đánh bại" thay "giết", "hạ gục" thay "tiêu diệt" (khi chỉ người)
+GIỚI HẠN: Toàn bài dưới 150 từ. Không văn phong báo chí trang trọng.
+TUYỆT ĐỐI KHÔNG dùng: giết, thảm sát, chém, đâm, bắn chết, căm thù, đảng, chính phủ, biểu tình, "Share ngay", "Tag bạn bè ngay", "Viral", "100%".
+Thay thế an toàn: "đánh bại" thay "giết", "hạ gục" thay "tiêu diệt" khi chỉ người.
 
-Chỉ trả lời nội dung post hoàn chỉnh, không giải thích, không tiêu đề.`;
+Chỉ trả lời nội dung caption hoàn chỉnh, không giải thích, không tiêu đề.`;
 
   const p2 = `Viết kịch bản đọc giọng CapCut TTS tiếng Việt cho tin game: "${selArt.title}"
 - Mỗi câu tối đa 10 chữ, xuống dòng sau mỗi câu
