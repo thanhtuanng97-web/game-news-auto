@@ -476,6 +476,10 @@ Chỉ trả lời kịch bản.`;
   btn.disabled = false; btn.innerHTML = '⚡ Tạo bài';
 }
 
+async function autoAll() {
+  await rewrite();
+}
+
 // ── IMAGE PROMPT (GEMINI) ──────────────────────
 async function genImgPrompt() {
   if (!selArt) { setSt('Chọn bài trước', false); return; }
