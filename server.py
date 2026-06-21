@@ -14,11 +14,19 @@ def index():
     return send_from_directory('.', 'app.html')
 
 SOURCES = [
-    {'url': 'https://vnexpress.net/rss/games.rss',    'name': 'VnExpress Game'},
-    {'url': 'https://gamek.vn/rss',                   'name': 'GameK'},
-    {'url': 'https://feeds.ign.com/ign/all',          'name': 'IGN'},
-    {'url': 'https://www.pcgamer.com/rss/',           'name': 'PC Gamer'},
-    {'url': 'https://www.eurogamer.net/?format=rss',  'name': 'Eurogamer'},
+    # Tiếng Việt
+    {'url': 'https://vnexpress.net/rss/games.rss',                        'name': 'VnExpress Game',  'lang': 'vi'},
+    {'url': 'https://gamek.vn/rss',                                       'name': 'GameK',           'lang': 'vi'},
+    # Tiếng Anh
+    {'url': 'https://feeds.ign.com/ign/all',                              'name': 'IGN',             'lang': 'en'},
+    {'url': 'https://www.pcgamer.com/rss/',                               'name': 'PC Gamer',        'lang': 'en'},
+    {'url': 'https://www.eurogamer.net/?format=rss',                      'name': 'Eurogamer',       'lang': 'en'},
+    {'url': 'https://www.gamespot.com/feeds/mashup/',                     'name': 'GameSpot',        'lang': 'en'},
+    {'url': 'https://www.rockpapershotgun.com/feed',                      'name': 'Rock Paper Shotgun', 'lang': 'en'},
+    {'url': 'https://www.polygon.com/rss/index.xml',                      'name': 'Polygon',         'lang': 'en'},
+    {'url': 'https://kotaku.com/rss',                                     'name': 'Kotaku',          'lang': 'en'},
+    {'url': 'https://www.vg247.com/feed',                                 'name': 'VG247',           'lang': 'en'},
+    {'url': 'https://www.gamesradar.com/feeds/articletype/news/',         'name': 'GamesRadar',      'lang': 'en'},
 ]
 
 def fetch_full_content(url):
@@ -46,6 +54,7 @@ def parse_source(src):
                 'pubDate':     e.get('published', ''),
                 'thumbnail':   thumb,
                 'source':      src['name'],
+                'lang':        src.get('lang', 'en'),
                 'content':     '',
             })
 

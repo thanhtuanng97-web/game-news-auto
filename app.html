@@ -425,7 +425,9 @@ async function rewrite() {
   setSt('AI đang viết lại bài...');
 
   const fullText = (selArt.content || selArt.description || '').replace(/<[^>]*>/g,'').slice(0, 1500);
-  const p1 = `Bạn là admin fanpage game VN có 500k follow. Nhiệm vụ: viết lại tin game sau thành 1 post Facebook hoàn chỉnh.
+  const isEn = (selArt.lang || 'en') === 'en';
+  const translateNote = isEn ? '\nLƯU Ý: Bài gốc bằng tiếng Anh — hãy dịch và diễn đạt lại hoàn toàn bằng tiếng Việt tự nhiên, KHÔNG dịch từng từ.' : '';
+  const p1 = `Bạn là admin fanpage game VN có 500k follow. Nhiệm vụ: viết lại tin game sau thành 1 post Facebook hoàn chỉnh bằng TIẾNG VIỆT.${translateNote}
 
 === NỘI DUNG BÀI GỐC ===
 Tiêu đề: "${selArt.title}"
