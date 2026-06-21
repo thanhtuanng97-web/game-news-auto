@@ -31,7 +31,7 @@ SOURCES = [
 
 def fetch_full_content(url):
     try:
-        downloaded = trafilatura.fetch_url(url)
+        downloaded = trafilatura.fetch_url(url, timeout=10)
         text = trafilatura.extract(downloaded, include_comments=False, include_tables=False)
         return (text or '').strip()[:2000]
     except:
@@ -39,7 +39,7 @@ def fetch_full_content(url):
 
 def parse_source(src):
     try:
-        feed = feedparser.parse(src['url'])
+        feed = feedparser.parse(src['url'], agent='Mozilla/5.0', request_headers={'Connection': 'close'})
         items = []
         for e in feed.entries[:10]:
             thumb = ''
@@ -76,8 +76,13 @@ def get_all():
     results = []
 
     if src_name == 'all':
-        for src in SOURCES:
-            results.extend(parse_source(src))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+            futures = {ex.submit(parse_source, src): src for src in SOURCES}
+            for future in concurrent.futures.as_completed(futures, timeout=30):
+                try:
+                    results.extend(future.result())
+                except Exception as e:
+                    print(f"Lỗi nguồn {futures[future]['name']}: {e}")
     else:
         src = next((s for s in SOURCES if s['name'] == src_name), None)
         if src:
