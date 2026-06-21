@@ -477,7 +477,8 @@ Chỉ trả lời đúng format: keyword1, keyword2, keyword3, keyword4`;
   try {
     const [o1, o2, o3] = await Promise.all([ai(p1), ai(p2), ai(p3)]);
     const sourceLink = selArt.link ? `\n\n🔗 Đọc thêm: ${selArt.link}` : '';
-    document.getElementById('fb-post').value       = o1.trim() + sourceLink;
+    const pageHashtags = '\n#PingCao #PingCaoVN #TinGameKhôngBaoGiờLag';
+    document.getElementById('fb-post').value       = o1.trim() + sourceLink + pageHashtags;
     document.getElementById('tts-out').textContent = o2.trim();
 
     // Hiển thị từ khoá gợi ý
